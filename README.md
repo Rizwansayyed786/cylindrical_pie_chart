@@ -1,0 +1,137 @@
+# cylindrical_pie_chart
+
+A beautiful and customizable Flutter widget for creating cylindrical pie charts with segmented rings, customizable colors, and hollow centers.
+
+## Features
+
+- 🎨 **Customizable Segments**: Create pie charts with any number of segments (3, 4, 5, etc.)
+- 🌈 **Custom Colors**: Assign different colors to each segment
+- 🔘 **Hollow Center**: Transparent center area for displaying content
+- 📏 **Configurable Radii**: Set inner and outer radius independently
+- 🎯 **Gap Control**: Specify gaps between segments in degrees or radians
+- ✨ **Dotted Circle**: Optional dotted inner circle with configurable radius
+- 🎭 **3D Effect**: Beautiful gradient effects for a cylindrical appearance
+- 🔄 **Rounded Ends**: Segments have rounded, circular ends
+
+## Installation
+
+Add this to your package's `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  cylindrical_pie_chart: ^1.0.0
+```
+
+Then run:
+
+```bash
+flutter pub get
+```
+
+## Usage
+
+### Basic Example
+
+```dart
+import 'package:cylindrical_pie_chart/cylindrical_pie_chart.dart';
+
+CylindricalPieChart(
+  numberOfSegments: 3,
+  segmentColors: const [
+    Color(0xFFE8D5C4), // Light beige
+    Color(0xFFE91E63), // Pink
+    Color(0xFF9C27B0), // Purple
+  ],
+  innerRadius: 100.0,
+  outerRadius: 140.0,
+  gapAngleDegrees: 10.0,
+  centerChild: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Text('Ovulation Phase'),
+      Text('Day 15', style: TextStyle(fontSize: 32)),
+    ],
+  ),
+)
+```
+
+### Advanced Example
+
+```dart
+CylindricalPieChart(
+  numberOfSegments: 5,
+  segmentColors: const [
+    Colors.red,
+    Colors.blue,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+  ],
+  innerRadius: 150.0,
+  outerRadius: 170.0,
+  gapAngleDegrees: 5.0,
+  dottedCircleRadius: 145.0,
+  padding: EdgeInsets.all(20.0),
+  showDividers: false,
+  centerChild: YourCustomWidget(),
+)
+```
+
+## Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `numberOfSegments` | `int` | Yes | - | Number of segments in the chart |
+| `segmentColors` | `List<Color>` | Yes | - | Colors for each segment |
+| `innerRadius` | `double` | Yes | - | Inner radius (hollow center) |
+| `outerRadius` | `double` | Yes | - | Outer radius of the ring |
+| `segmentAngles` | `List<double>?` | No | `null` | Custom angles for each segment (in radians) |
+| `dottedCircleRadius` | `double?` | No | `innerRadius - 5` | Radius of the dotted inner circle |
+| `gapAngle` | `double?` | No | `0.1` | Gap between segments in radians |
+| `gapAngleDegrees` | `double?` | No | `null` | Gap between segments in degrees (takes precedence) |
+| `centerChild` | `Widget?` | No | `null` | Widget to display in the center |
+| `padding` | `EdgeInsets?` | No | `null` | Padding around the chart |
+| `showDividers` | `bool` | No | `true` | Whether to show divider lines from center |
+
+## Examples
+
+### 3 Segments with Custom Gaps
+
+```dart
+CylindricalPieChart(
+  numberOfSegments: 3,
+  segmentColors: [Colors.red, Colors.blue, Colors.green],
+  innerRadius: 100.0,
+  outerRadius: 140.0,
+  gapAngleDegrees: 15.0, // 15 degree gaps
+)
+```
+
+### Custom Segment Angles
+
+```dart
+CylindricalPieChart(
+  numberOfSegments: 3,
+  segmentColors: [Colors.purple, Colors.pink, Colors.orange],
+  segmentAngles: [
+    3.1416,  // π radians = 180° (half circle)
+    1.5708,  // π/2 radians = 90°
+    1.5708,  // π/2 radians = 90°
+  ],
+  innerRadius: 100.0,
+  outerRadius: 140.0,
+)
+```
+
+## License
+
+This project is licensed under the MIT License.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Support
+
+If you encounter any issues or have questions, please file an issue on the [GitHub repository](https://github.com/yourusername/cylindrical_pie_chart/issues).
+

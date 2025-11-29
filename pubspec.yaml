@@ -1,0 +1,23 @@
+name: cylindrical_pie_chart
+description: A customizable Flutter widget for creating beautiful cylindrical pie charts with segmented rings, customizable colors, and hollow centers.
+version: 1.0.0
+homepage: https://github.com/Rizwansayyed786/cylindrical_pie_chart
+repository: https://github.com/Rizwansayyed786/cylindrical_pie_chart
+issue_tracker: https://github.com/Rizwansayyed786/cylindrical_pie_chart/issues
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
