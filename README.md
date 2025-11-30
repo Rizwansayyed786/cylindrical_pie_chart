@@ -4,8 +4,6 @@ A beautiful and customizable Flutter widget for creating cylindrical pie charts 
 
 ![Cylindrical Pie Chart Example](https://raw.githubusercontent.com/Rizwansayyed786/cylindrical_pie_chart/main/assets/example.png)
 
-> **Note**: To add the example image, save your screenshot as `assets/example.png` in the package directory and push it to your GitHub repository.
-
 ## Features
 
 - 🎨 **Customizable Segments**: Create pie charts with any number of segments (3, 4, 5, etc.)
