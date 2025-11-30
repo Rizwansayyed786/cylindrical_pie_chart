@@ -23,7 +23,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  cylindrical_pie_chart: ^1.0.0
+  cylindrical_pie_chart: ^1.1.1
 ```
 
 Then run:

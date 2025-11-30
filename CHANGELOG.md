@@ -1,3 +1,8 @@
+## 1.1.1
+
+* Added example image asset to showcase the cylindrical pie chart appearance
+* Updated documentation with visual example
+
 ## 1.1.0
 
 * Added `segmentValues` parameter for dynamic segment sizes based on percentages
