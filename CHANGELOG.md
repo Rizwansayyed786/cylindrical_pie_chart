@@ -1,3 +1,11 @@
+## 1.1.0
+
+* Added `segmentValues` parameter for dynamic segment sizes based on percentages
+* Added `dottedCircleColor` parameter to customize dotted circle color
+* Added `showDottedCircle` parameter to show/hide the dotted circle
+* Implemented `showDividers` functionality - white lines from center to segment boundaries
+* Improved documentation with new features and examples
+
 ## 1.0.0
 
 * Initial release
