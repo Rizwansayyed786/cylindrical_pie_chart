@@ -14,8 +14,15 @@ class CylindricalPieChart extends StatelessWidget {
   
   /// Optional list of angles (in radians) for each segment. 
   /// If provided, must have same length as numberOfSegments.
-  /// If null, segments will be equally distributed.
+  /// If null, segments will be distributed based on segmentValues or equally.
   final List<double>? segmentAngles;
+  
+  /// Optional list of values/percentages for each segment.
+  /// If provided, segments will be sized proportionally to these values.
+  /// Values will be normalized (e.g., [10, 20, 30] becomes [16.67%, 33.33%, 50%]).
+  /// If null and segmentAngles is null, segments will be equally distributed.
+  /// Must have same length as numberOfSegments if provided.
+  final List<double>? segmentValues;
   
   /// Inner radius of the circular ring (defines the hollow center)
   final double innerRadius;
@@ -25,6 +32,12 @@ class CylindricalPieChart extends StatelessWidget {
   
   /// Radius of the dotted inner circle. If null, defaults to innerRadius - 5
   final double? dottedCircleRadius;
+  
+  /// Color of the dotted inner circle. If null, defaults to Colors.grey.shade300
+  final Color? dottedCircleColor;
+  
+  /// Whether to show the dotted inner circle. Defaults to true
+  final bool showDottedCircle;
   
   /// Gap angle between segments in radians. 
   /// If gapAngleDegrees is provided, this will be ignored.
@@ -42,7 +55,8 @@ class CylindricalPieChart extends StatelessWidget {
   /// Optional padding around the chart
   final EdgeInsets? padding;
   
-  /// Whether to show divider lines from center
+  /// Whether to show divider lines from center to segment boundaries.
+  /// These are white lines that extend from the center to the inner radius.
   final bool showDividers;
 
   CylindricalPieChart({
@@ -50,9 +64,12 @@ class CylindricalPieChart extends StatelessWidget {
     required this.numberOfSegments,
     required this.segmentColors,
     this.segmentAngles,
+    this.segmentValues,
     required this.innerRadius,
     required this.outerRadius,
     this.dottedCircleRadius,
+    this.dottedCircleColor,
+    this.showDottedCircle = true,
     this.gapAngle,
     this.gapAngleDegrees,
     this.centerChild,
@@ -77,6 +94,18 @@ class CylindricalPieChart extends StatelessWidget {
         assert(
           segmentAngles == null || segmentAngles.length == numberOfSegments,
           'segmentAngles must have same length as numberOfSegments',
+        ),
+        assert(
+          segmentValues == null || segmentValues.length == numberOfSegments,
+          'segmentValues must have same length as numberOfSegments',
+        ),
+        assert(
+          segmentValues == null || segmentValues.every((v) => v >= 0),
+          'All segmentValues must be non-negative',
+        ),
+        assert(
+          segmentAngles == null || segmentValues == null,
+          'Cannot provide both segmentAngles and segmentValues',
         );
 
   @override
@@ -92,9 +121,12 @@ class CylindricalPieChart extends StatelessWidget {
           numberOfSegments: numberOfSegments,
           segmentColors: segmentColors,
           segmentAngles: segmentAngles,
+          segmentValues: segmentValues,
           innerRadius: innerRadius,
           outerRadius: outerRadius,
           dottedCircleRadius: dottedCircleRadius ?? (innerRadius - 5),
+          dottedCircleColor: dottedCircleColor,
+          showDottedCircle: showDottedCircle,
           gapAngle: gapAngleDegrees != null 
               ? (gapAngleDegrees! * math.pi / 180) 
               : (gapAngle ?? 0.1),
@@ -119,9 +151,12 @@ class _CylindricalPieChartPainter extends CustomPainter {
   final int numberOfSegments;
   final List<Color> segmentColors;
   final List<double>? segmentAngles;
+  final List<double>? segmentValues;
   final double innerRadius;
   final double outerRadius;
   final double dottedCircleRadius;
+  final Color? dottedCircleColor;
+  final bool showDottedCircle;
   final double gapAngle;
   final bool showDividers;
 
@@ -129,9 +164,12 @@ class _CylindricalPieChartPainter extends CustomPainter {
     required this.numberOfSegments,
     required this.segmentColors,
     this.segmentAngles,
+    this.segmentValues,
     required this.innerRadius,
     required this.outerRadius,
     required this.dottedCircleRadius,
+    this.dottedCircleColor,
+    this.showDottedCircle = true,
     required this.gapAngle,
     this.showDividers = true,
   });
@@ -148,8 +186,24 @@ class _CylindricalPieChartPainter extends CustomPainter {
       outerRadius: outerRadius,
     );
 
-    // Draw central circle with dotted outline (slightly inside inner radius)
-    _drawCentralCircle(canvas: canvas, center: center, radius: dottedCircleRadius);
+    // Draw divider lines if enabled
+    if (showDividers) {
+      _drawDividers(
+        canvas: canvas,
+        center: center,
+        innerRadius: innerRadius,
+      );
+    }
+
+    // Draw central circle with dotted outline (slightly inside inner radius) if enabled
+    if (showDottedCircle) {
+      _drawCentralCircle(
+        canvas: canvas,
+        center: center,
+        radius: dottedCircleRadius,
+        color: dottedCircleColor ?? Colors.grey.shade300,
+      );
+    }
   }
 
   void _drawSegmentedRing({
@@ -161,7 +215,26 @@ class _CylindricalPieChartPainter extends CustomPainter {
     // Calculate segment angles
     final List<double> angles;
     if (segmentAngles != null) {
+      // Use provided angles directly
       angles = segmentAngles!;
+    } else if (segmentValues != null) {
+      // Calculate angles based on segment values/percentages
+      final totalGapAngle = gapAngle * numberOfSegments;
+      final availableAngle = (2 * math.pi) - totalGapAngle;
+      
+      // Normalize segment values (convert to proportions)
+      final totalValue = segmentValues!.fold(0.0, (sum, value) => sum + value);
+      
+      if (totalValue > 0) {
+        // Calculate angles proportionally based on values
+        angles = segmentValues!.map((value) {
+          return (value / totalValue) * availableAngle;
+        }).toList();
+      } else {
+        // If all values are zero, use equal distribution
+        final equalAngle = availableAngle / numberOfSegments;
+        angles = List.generate(numberOfSegments, (i) => equalAngle);
+      }
     } else {
       // Calculate equal angles for each segment, accounting for gaps
       final totalGapAngle = gapAngle * numberOfSegments;
@@ -261,14 +334,69 @@ class _CylindricalPieChartPainter extends CustomPainter {
   }
 
 
+  void _drawDividers({
+    required Canvas canvas,
+    required Offset center,
+    required double innerRadius,
+  }) {
+    // Calculate segment angles to determine divider positions
+    final List<double> angles;
+    if (segmentAngles != null) {
+      angles = segmentAngles!;
+    } else if (segmentValues != null) {
+      final totalGapAngle = gapAngle * numberOfSegments;
+      final availableAngle = (2 * math.pi) - totalGapAngle;
+      final totalValue = segmentValues!.fold(0.0, (sum, value) => sum + value);
+      
+      if (totalValue > 0) {
+        angles = segmentValues!.map((value) {
+          return (value / totalValue) * availableAngle;
+        }).toList();
+      } else {
+        final equalAngle = availableAngle / numberOfSegments;
+        angles = List.generate(numberOfSegments, (i) => equalAngle);
+      }
+    } else {
+      final totalGapAngle = gapAngle * numberOfSegments;
+      final availableAngle = (2 * math.pi) - totalGapAngle;
+      final equalAngle = availableAngle / numberOfSegments;
+      angles = List.generate(numberOfSegments, (i) => equalAngle);
+    }
+
+    // Draw divider lines from center to inner radius
+    final dividerPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    double currentAngle = -math.pi / 2; // Start from top
+    
+    for (int i = 0; i <= numberOfSegments; i++) {
+      final angle = currentAngle;
+      final endX = center.dx + innerRadius * math.cos(angle);
+      final endY = center.dy + innerRadius * math.sin(angle);
+      
+      canvas.drawLine(
+        center,
+        Offset(endX, endY),
+        dividerPaint,
+      );
+      
+      if (i < numberOfSegments) {
+        currentAngle += angles[i] + gapAngle;
+      }
+    }
+  }
+
   void _drawCentralCircle({
     required Canvas canvas,
     required Offset center,
     required double radius,
+    required Color color,
   }) {
     // Draw dotted circle outline
     final paint = Paint()
-      ..color = Colors.grey.shade300
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
@@ -297,9 +425,12 @@ class _CylindricalPieChartPainter extends CustomPainter {
     return numberOfSegments != oldDelegate.numberOfSegments ||
         segmentColors != oldDelegate.segmentColors ||
         segmentAngles != oldDelegate.segmentAngles ||
+        segmentValues != oldDelegate.segmentValues ||
         innerRadius != oldDelegate.innerRadius ||
         outerRadius != oldDelegate.outerRadius ||
         dottedCircleRadius != oldDelegate.dottedCircleRadius ||
+        dottedCircleColor != oldDelegate.dottedCircleColor ||
+        showDottedCircle != oldDelegate.showDottedCircle ||
         gapAngle != oldDelegate.gapAngle ||
         showDividers != oldDelegate.showDividers;
   }
